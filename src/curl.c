@@ -269,12 +269,7 @@ int AkvSign(const char *type, const char *keyvault, const char *keyname, const M
   json_object_object_add(json, "alg", json_object_new_string(alg));
   
   //json_object_object_add(json, "value", json_object_new_string(encodeResult));
-  Log(LogLevel_Debug, "pre create value");
-  struct json_object *v =  json_object_new_string(encodeResult);
-  Log(LogLevel_Debug, "post create value");
-  Log(LogLevel_Debug, "json value: %s", json_object_to_json_string(v));
-
-  json_object_object_add(json, "value", v);
+  json_object_object_add(json, "value", json_object_new_string(encodeResult));
   Log(LogLevel_Debug, "json obj created");
 
   curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "POST");
