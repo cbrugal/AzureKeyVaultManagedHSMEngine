@@ -49,6 +49,7 @@ void WriteLog(
            shortFilename,
            line);
     vfprintf(filepntr, format, arglist);
+    vfprintf(filepntr, "\n", arglist);
     fclose(filepntr);
     // va_end(arglist);
 }

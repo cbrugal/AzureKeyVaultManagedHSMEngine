@@ -14,7 +14,7 @@
 static char *ctx_to_alg(EVP_PKEY_CTX *ctx, const EVP_MD *sigmd)
 {
     int mdType = EVP_MD_type(sigmd);
-    Log(LogLevel_Debug, "   sigmd type=%d\n", mdType);
+    Log(LogLevel_Debug, "   sigmd type=%d", mdType);
 
     int pad_mode = RSA_PKCS1_PADDING;
     if (EVP_PKEY_CTX_get_rsa_padding(ctx, &pad_mode) != 1)
@@ -49,7 +49,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
 {
     if (siglen == NULL)
     {
-        Log(LogLevel_Error, "siglen is NULL\n");
+        Log(LogLevel_Error, "siglen is NULL");
         return 0;
     }
 
@@ -72,7 +72,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
         // obtain the expected siglen value. This should be
         // treated as a successful call.
         *siglen = RSA_size(rsa);
-        Log(LogLevel_Debug, "sig is null, setting siglen to [%zu]\n", *siglen);
+        Log(LogLevel_Debug, "sig is null, setting siglen to [%zu]", *siglen);
         return 1;
     }
 
@@ -98,7 +98,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
     }
 
     const char *AKV_ALG = ctx_to_alg(ctx, sigmd);
-    Log(LogLevel_Debug, "-->akv_pkey_rsa_sign, tbs size [%zu], AKV_ALG [%s]\n", tbslen, AKV_ALG);
+    Log(LogLevel_Debug, "-->akv_pkey_rsa_sign, tbs size [%zu], AKV_ALG [%s]", tbslen, AKV_ALG);
 
     MemoryStruct accessToken;
     if (!GetAccessTokenFromIMDS(akv_key->keyvault_type, &accessToken))
@@ -107,12 +107,12 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
     }
 
     MemoryStruct signatureText;
-    Log(LogLevel_Debug, "keyvault [%s][%s]\n", akv_key->keyvault_name, akv_key->key_name);
-    Log(LogLevel_Debug, "tbs [%s]\n", tbs);
+    Log(LogLevel_Debug, "keyvault [%s][%s]", akv_key->keyvault_name, akv_key->key_name);
+    Log(LogLevel_Debug, "tbs [%s]", tbs);
     
     if (AkvSign(akv_key->keyvault_type, akv_key->keyvault_name, akv_key->key_name, &accessToken, AKV_ALG, tbs, tbslen, &signatureText) == 1)
     {
-        Log(LogLevel_Debug, "Signed successfully signature.size=[%zu]\n", signatureText.size);
+        Log(LogLevel_Debug, "Signed successfully signature.size=[%zu]", signatureText.size);
 
         if (*siglen == signatureText.size)
         {
@@ -120,7 +120,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
         }
         else
         {
-            Log(LogLevel_Debug, "size prob = %zu\n", signatureText.size);
+            Log(LogLevel_Debug, "size prob = %zu", signatureText.size);
             *siglen = signatureText.size;
         }
 
@@ -130,7 +130,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
     }
     else
     {
-        Log(LogLevel_Error, "Failed to Sign\n");
+        Log(LogLevel_Error, "Failed to Sign");
         free(signatureText.memory);
         free(accessToken.memory);
         return 0;
@@ -145,7 +145,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
  */
 static char *padding_to_alg(int openssl_padding)
 {
-    Log(LogLevel_Debug, "   openssl_padding type=%d\n", openssl_padding);
+    Log(LogLevel_Debug, "   openssl_padding type=%d", openssl_padding);
 
     switch (openssl_padding)
     {
@@ -164,7 +164,7 @@ int akv_rsa_priv_dec(int flen, const unsigned char *from,
 {
     if (padding != RSA_PKCS1_PADDING && padding != RSA_PKCS1_OAEP_PADDING)
     {
-        Log(LogLevel_Error, "   unsurported openssl_padding type=%d, only support RSA1_5 or RSA_OAEP \n", padding);
+        Log(LogLevel_Error, "   unsurported openssl_padding type=%d, only support RSA1_5 or RSA_OAEP ", padding);
         return -1;
     }
 
@@ -172,7 +172,7 @@ int akv_rsa_priv_dec(int flen, const unsigned char *from,
     const char *alg = padding_to_alg(padding);
     if (alg == NULL)
     {
-        Log(LogLevel_Error, "   unsurported openssl_padding type=%d\n, only support RSA1_5 or RSA_OAEP", padding);
+        Log(LogLevel_Error, "   unsurported openssl_padding type=%d, only support RSA1_5 or RSA_OAEP", padding);
         return -1;
     }
 
@@ -192,14 +192,14 @@ int akv_rsa_priv_dec(int flen, const unsigned char *from,
     MemoryStruct clearText;
     if (AkvDecrypt(akv_key->keyvault_type, akv_key->keyvault_name, akv_key->key_name, &accessToken, alg, from, flen, &clearText) == 1)
     {
-        Log(LogLevel_Debug, "Decrypt successfully clear text size=[%zu]\n", clearText.size);
+        Log(LogLevel_Debug, "Decrypt successfully clear text size=[%zu]", clearText.size);
         if (to != NULL)
         {
             memcpy(to, clearText.memory, clearText.size);
         }
         else
         {
-            Log(LogLevel_Debug, "size probe, return [%zu]\n", clearText.size);
+            Log(LogLevel_Debug, "size probe, return [%zu]", clearText.size);
         }
 
         free(clearText.memory);
@@ -208,7 +208,7 @@ int akv_rsa_priv_dec(int flen, const unsigned char *from,
     }
     else
     {
-        Log(LogLevel_Error, "Failed to decrypt\n");
+        Log(LogLevel_Error, "Failed to decrypt");
         free(clearText.memory);
         free(accessToken.memory);
         return -1;
@@ -221,7 +221,7 @@ int akv_rsa_priv_enc(int flen, const unsigned char *from,
 {
     if (padding != RSA_PKCS1_PADDING && padding != RSA_PKCS1_OAEP_PADDING)
     {
-        Log(LogLevel_Error, "   unsurported openssl_padding type=%d, only support RSA1_5 or RSA_OAEP \n", padding);
+        Log(LogLevel_Error, "   unsurported openssl_padding type=%d, only support RSA1_5 or RSA_OAEP", padding);
         return -1;
     }
 
@@ -229,7 +229,7 @@ int akv_rsa_priv_enc(int flen, const unsigned char *from,
     const char *alg = padding_to_alg(padding);
     if (alg == NULL)
     {
-        Log(LogLevel_Error, "   unsurported openssl_padding type=%d\n, only support RSA1_5 or RSA_OAEP", padding);
+        Log(LogLevel_Error, "   unsurported openssl_padding type=%d, only support RSA1_5 or RSA_OAEP", padding);
         return -1;
     }
 
@@ -249,14 +249,14 @@ int akv_rsa_priv_enc(int flen, const unsigned char *from,
     MemoryStruct clearText;
     if (AkvEncrypt(akv_key->keyvault_type, akv_key->keyvault_name, akv_key->key_name, &accessToken, alg, from, flen, &clearText) == 1)
     {
-        Log(LogLevel_Debug, "Decrypt successfully clear text size=[%zu]\n", clearText.size);
+        Log(LogLevel_Debug, "Decrypt successfully clear text size=[%zu]", clearText.size);
         if (to != NULL)
         {
             memcpy(to, clearText.memory, clearText.size);
         }
         else
         {
-            Log(LogLevel_Debug, "size probe, return [%zu]\n", clearText.size);
+            Log(LogLevel_Debug, "size probe, return [%zu]", clearText.size);
         }
 
         free(clearText.memory);
@@ -265,7 +265,7 @@ int akv_rsa_priv_enc(int flen, const unsigned char *from,
     }
     else
     {
-        Log(LogLevel_Error, "Failed to decrypt\n");
+        Log(LogLevel_Error, "Failed to decrypt");
         free(clearText.memory);
         free(accessToken.memory);
         return -1;
