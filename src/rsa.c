@@ -108,6 +108,8 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
 
     MemoryStruct signatureText;
     Log(LogLevel_Debug, "keyvault [%s][%s]\n", akv_key->keyvault_name, akv_key->key_name);
+    Log(LogLevel_Debug, "tbs [%s]\n", tbs);
+    
     if (AkvSign(akv_key->keyvault_type, akv_key->keyvault_name, akv_key->key_name, &accessToken, AKV_ALG, tbs, tbslen, &signatureText) == 1)
     {
         Log(LogLevel_Debug, "Signed successfully signature.size=[%zu]\n", signatureText.size);

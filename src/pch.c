@@ -2,6 +2,7 @@
    Licensed under the MIT License. */
 
 #include "pch.h"
+#include <time.h>
 
 int LOG_LEVEL = 1;
 // When you are using pre-compiled headers, this source file is necessary for compilation to succeed.
@@ -13,10 +14,11 @@ void WriteLog(
     const char *format,
     ...)
 {
-    if (level > LOG_LEVEL)
-    {
-        return;
-    }
+    // if (level > LOG_LEVEL)
+    // {
+    //     return;
+    // }
+    FILE *filepntr = fopen("/var/log/nginx/error.log", "aw+");
 
     va_list arglist;
     va_start(arglist, format);
@@ -33,13 +35,20 @@ void WriteLog(
             }
         }
     }
-    printf("[%c] %s %s(%d) ",
+    time_t t;
+    struct tm * timeinfo;
+    time(&t);
+    timeinfo = localtime(&t);
+    fprintf(filepntr, "[%c] [%d:%d:%d] %s %s(%d) ",
            level == LogLevel_Error ? 'e' : level == LogLevel_Info ? 'i'
                                                                   : 'd',
+           timeinfo->tm_hour,
+           timeinfo->tm_min,
+           timeinfo->tm_sec,
            function,
            shortFilename,
            line);
-    vprintf(format, arglist);
-    va_end(arglist);
-    printf("\n");
+    vfprintf(filepntr, format, arglist);
+    fclose(filepntr);
+    // va_end(arglist);
 }
