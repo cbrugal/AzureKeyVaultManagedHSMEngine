@@ -202,24 +202,15 @@ int AkvSign(const char *type, const char *keyvault, const char *keyname, const M
     Log(LogLevel_Error, "could not encode hash text");
     goto cleanup;
   }
+
+  // encodeResult = (unsigned char *)malloc(outputLen);
+  // base64urlEncode(hashText, hashTextSize, encodeResult, &outputLen);
   
-  Log(LogLevel_Debug, "hashtext: %s", hashText);
-  Log(LogLevel_Debug, "hashtext size: %zu", hashTextSize);
+  unsigned char *hash = (unsigned char *)malloc(outputLen);
+  memcpy(hash, hashText, outputLen);
 
   encodeResult = (unsigned char *)malloc(outputLen);
-  base64urlEncode(hashText, hashTextSize, encodeResult, &outputLen);
-  
-  Log(LogLevel_Debug, "encode result: %u", encodeResult);
-  Log(LogLevel_Debug, "output length: %d", outputLen);
-
-
-  // ours
-  // encodeResult = base64_encode(hashText, hashTextSize, &outputLen);
-  // Log(LogLevel_Debug, "hashtext: %s\n", hashText);
-  // Log(LogLevel_Debug, "hashtext size: %d\n", hashTextSize);
-  // for(int i = 0; i < 43; i++){
-  //     Log(LogLevel_Debug, "[%d]: %c\n", i, (hashText+i));
-  // }
+  base64urlEncode(hash, hashTextSize, encodeResult, &outputLen);
 
   char keyVaultUrl[4 * 1024] = {0};
   if (strcasecmp(type, "managedHsm") == 0)
@@ -267,9 +258,7 @@ int AkvSign(const char *type, const char *keyvault, const char *keyname, const M
   Log(LogLevel_Debug, "attempting to create json obj with alg= %s", alg);
   json = json_object_new_object();
   json_object_object_add(json, "alg", json_object_new_string(alg));
-  
-  //json_object_object_add(json, "value", json_object_new_string(encodeResult));
-  json_object_object_add(json, "value", json_object_new_string(encodeResult));
+  json_object_object_add(json, "value", json_object_new_string(hash));
   Log(LogLevel_Debug, "json obj created");
 
   curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "POST");

@@ -59,6 +59,7 @@ int akv_eckey_sign(int type, const unsigned char *dgst, int dlen,
   AKV_KEY *akv_key = EC_KEY_get_ex_data(eckey, eckey_akv_idx);
   if (!akv_key)
   {
+    Log(LogLevel_Debug, "akv_eckey_sign -> EC_KEY_get_ex_data before reporting failed");
     AKVerr(AKV_F_EC_KEY_SIGN, AKV_R_CANT_GET_AKV_KEY);
     return res;
   }

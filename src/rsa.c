@@ -50,6 +50,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
     if (siglen == NULL)
     {
         Log(LogLevel_Error, "siglen is NULL");
+        Log(LogLevel_Debug, "akv_pkey_rsa_sign siglen is null");
         return 0;
     }
 
@@ -57,6 +58,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
     if (!pkey)
     {
         AKVerr(AKV_F_RSA_SIGN, AKV_R_CANT_GET_KEY);
+        Log(LogLevel_Debug, "here no pkey");
         return -1;
     }
 
@@ -64,6 +66,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
     if (!rsa)
     {
         AKVerr(AKV_F_RSA_SIGN, AKV_R_INVALID_RSA);
+        Log(LogLevel_Debug, "akv_pkey_rsa_sign no rsa");
         return -1;
     }
 
@@ -73,13 +76,16 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
         // treated as a successful call.
         *siglen = RSA_size(rsa);
         Log(LogLevel_Debug, "sig is null, setting siglen to [%zu]", *siglen);
+        Log(LogLevel_Debug, "akv_pkey_rsa_sign no sig");
         return 1;
     }
 
     AKV_KEY *akv_key = RSA_get_ex_data(rsa, rsa_akv_idx);
     if (!akv_key)
     {
+        Log(LogLevel_Debug, "akv_pkey_rsa_sign -> RSA_get_ex_data before reporting");
         AKVerr(AKV_F_RSA_SIGN, AKV_R_CANT_GET_AKV_KEY);
+        Log(LogLevel_Debug, "akv_pkey_rsa_sign -> RSA_get_ex_data failed");
         return -1;
     }
 
@@ -87,6 +93,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
     if (EVP_PKEY_CTX_get_signature_md(ctx, &sigmd) != 1)
     {
         AKVerr(AKV_F_RSA_SIGN, AKV_R_INVALID_MD);
+        Log(LogLevel_Debug, "akv_pkey_rsa_sign EVP_PKEY_CTX_get_signature_md not 1");
         return 0;
     }
 
@@ -94,6 +101,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
     if (!sigmd)
     {
         AKVerr(AKV_F_RSA_SIGN, AKV_R_NO_PADDING);
+        Log(LogLevel_Debug, "akv_pkey_rsa_sign not signed");
         return 0;
     }
 
@@ -103,13 +111,14 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
     MemoryStruct accessToken;
     if (!GetAccessTokenFromIMDS(akv_key->keyvault_type, &accessToken))
     {
+        Log(LogLevel_Debug, "akv_pkey_rsa_sign has no access token from IMDS");
         return 0;
     }
 
     MemoryStruct signatureText;
     Log(LogLevel_Debug, "keyvault [%s][%s]", akv_key->keyvault_name, akv_key->key_name);
     Log(LogLevel_Debug, "tbs [%s]", tbs);
-    
+    Log(LogLevel_Debug, "here");
     if (AkvSign(akv_key->keyvault_type, akv_key->keyvault_name, akv_key->key_name, &accessToken, AKV_ALG, tbs, tbslen, &signatureText) == 1)
     {
         Log(LogLevel_Debug, "Signed successfully signature.size=[%zu]", signatureText.size);
@@ -126,6 +135,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
 
         free(signatureText.memory);
         free(accessToken.memory);
+        Log(LogLevel_Debug, "akv_pkey_rsa_sign sucessful");
         return 1;
     }
     else
@@ -133,6 +143,7 @@ int akv_pkey_rsa_sign(EVP_PKEY_CTX *ctx, unsigned char *sig,
         Log(LogLevel_Error, "Failed to Sign");
         free(signatureText.memory);
         free(accessToken.memory);
+        Log(LogLevel_Debug, "akv_pkey_rsa_sign failed to sign");
         return 0;
     }
 }
@@ -179,6 +190,7 @@ int akv_rsa_priv_dec(int flen, const unsigned char *from,
     akv_key = RSA_get_ex_data(rsa, rsa_akv_idx);
     if (!akv_key)
     {
+        Log(LogLevel_Debug, "akv_rsa_priv_dec -> RSA_get_ex_data before reporting failed");
         AKVerr(AKV_F_RSA_PRIV_DEC, AKV_R_CANT_GET_AKV_KEY);
         return -1;
     }
@@ -236,6 +248,7 @@ int akv_rsa_priv_enc(int flen, const unsigned char *from,
     akv_key = RSA_get_ex_data(rsa, rsa_akv_idx);
     if (!akv_key)
     {
+        Log(LogLevel_Debug, "akv_rsa_priv_enc -> RSA_get_ex_data before reporting failed");
         AKVerr(AKV_F_RSA_PRIV_DEC, AKV_R_CANT_GET_AKV_KEY);
         return -1;
     }
